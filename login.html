@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login</title>
+  <link rel="stylesheet" href="auth.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="auth-container">
+    <div class="auth-card">
+      <div class="logo">⚡</div>
+      <h1>Login</h1>
+      <p class="subtitle">Sistem Monitoring Pembangkit Listrik Tenaga Mikrohidro Berbasis IoT</p>
+
+      <form id="loginForm">
+        <input type="email" id="loginEmail" placeholder="Email" required>
+        <div class="password-wrapper">
+          <input type="password" id="loginPassword" placeholder="Password" required>
+          <span class="toggle-password" id="toggleLoginPassword">👁️</span>
+        </div>
+        <button type="submit" class="btn-primary">Login</button>
+      </form>
+
+      <button type="button" id="googleLogin" class="btn-google">
+        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google logo">
+        Login dengan Google
+      </button>
+
+      <p class="switch-auth">
+        Belum punya akun? <a href="register.html">Daftar disini</a>
+      </p>
+    </div>
+  </div>
+
+  <!-- Import JS -->
+  <script type="module" src="login.js"></script>
+</body>
+</html>

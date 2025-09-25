@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profil</title>
+  <link rel="stylesheet" href="profile.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>👤 Profil Pengguna</h1>
+    </div>
+
+    <div class="profile-card">
+        <!-- Avatar pakai huruf awal user -->
+        <div class="avatar-large" id="profileAvatar">?</div>
+
+        <h2 id="profileName">Nama Pengguna</h2>
+        <p id="profileEmail">email@example.com</p>
+
+        <!-- Bungkus tombol dengan .profile-actions -->
+        <div class="profile-actions">
+            <button class="btn-primary" id="logoutBtn">Hapus Akun</button>
+            <button class="btn-secondary" onclick="window.location.href='agnivolt.html'">
+                ⬅ Kembali ke Dashboard
+            </button>
+        </div>
+    </div>
+  </div>
+
+  <!-- Script Profile -->
+  <script type="module" src="profile.js"></script>
+</body>
+</html>
