@@ -8,94 +8,99 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <div class="container">
-    <!-- Header dengan avatar -->
-    <div class="header">
-      <div class="header-top">
-        <div class="header-title">
-          <h1>🌊 Agnivolt Dashboard</h1>
-          <p>Sistem Monitoring Pembangkit Listrik Tenaga Mikrohidro Berbasis IoT
-            <span class="status-indicator" title="Status: Online"></span>
-          </p>
+    <div class="container">
+        <!-- Header dengan avatar -->
+        <div class="header">
+            <div class="header-top">
+                <div class="header-title">
+                    <h1>🌊 Agnivolt Dashboard</h1>
+                    <p>Sistem Monitoring Pembangkit Listrik Tenaga Mikrohidro Berbasis IoT
+                        <span class="status-indicator" title="Status: Online"></span>
+                    </p>
+                </div>
+            </div>
         </div>
-      </div>
+
+        <!-- Status Cards -->
+        <div class="status-bar">
+            <div class="status-card voltage">
+                <h3>Tegangan</h3>
+                <div class="status-value" id="voltage">12.5</div>
+                <div class="status-unit">Volt</div>
+            </div>
+            <div class="status-card current">
+                <h3>Arus</h3>
+                <div class="status-value" id="current">2.8</div>
+                <div class="status-unit">Ampere</div>
+            </div>
+            <div class="status-card power">
+                <h3>Daya</h3>
+                <div class="status-value" id="power">35</div>
+                <div class="status-unit">Watt</div>
+            </div>
+            <div class="status-card rpm">
+                <h3>Kecepatan Turbin</h3>
+                <div class="status-value" id="rpm">450</div>
+                <div class="status-unit">RPM</div>
+            </div>
+        </div>
+
+        <!-- Chart + Summary -->
+        <div class="grid">
+            <div class="chart-container">
+                <div class="chart-tabs">
+                    <button class="tab-button active" onclick="switchChart('realtime', this)">Real-time</button>
+                    <button class="tab-button" onclick="switchChart('daily', this)">Harian</button>
+                    <button class="tab-button" onclick="switchChart('weekly', this)">Mingguan</button>
+                </div>
+                <h2>Grafik Monitoring Real-time</h2>
+                <canvas id="realtimeChart"></canvas>
+            </div>
+
+            <div class="summary-cards">
+                <div class="summary-card">
+                    <h3>Durasi Penggunaan Hari Ini</h3>
+                    <div class="summary-value" id="duration">14.5</div>
+                    <div class="status-unit">Jam</div>
+                </div>
+                <div class="summary-card">
+                    <h3>Total Daya Dihasilkan</h3>
+                    <div class="summary-value" id="totalPower">847</div>
+                    <div class="status-unit">kWh</div>
+                </div>
+                <div class="summary-card">
+                    <h3>Efisiensi</h3>
+                    <div class="summary-value" id="efficiency">87</div>
+                    <div class="status-unit">%</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mini Avatar -->
+        <div class="user-avatar" id="miniAvatar"></div>
+
+        <!-- FAB AI Assistant -->
+        <div class="ai-fab" id="aiFab">🤖</div>
+
+        <!-- Overlay AI Assistant -->
+        <div class="ai-overlay" id="aiOverlay">
+            <div class="ai-card">
+                <button class="ai-close" id="aiClose">✖</button>
+                <h2>🤖 AI Assistant - Agnivolt</h2>
+                <div class="ai-chat">
+                    <div class="chat-messages" id="chatMessages">
+                        <div class="message ai">
+                            <strong>Agnivolt AI:</strong> Selamat datang! Saya adalah asisten AI untuk sistem PLTMH Anda. Bagaimana saya bisa membantu Anda hari ini? 
+                        </div>
+                    </div>
+                    <div class="chat-input">
+                        <input type="text" id="chatInput" placeholder="Tanyakan tentang sistem PLTMH Anda...">
+                        <button onclick="sendMessage()">➤</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-
-    <!-- Status Cards -->
-    <div class="status-bar">
-      <div class="status-card voltage">
-        <h3>Tegangan</h3>
-        <div class="status-value" id="voltage">12.5</div>
-        <div class="status-unit">Volt</div>
-      </div>
-      <div class="status-card current">
-        <h3>Arus</h3>
-        <div class="status-value" id="current">2.8</div>
-        <div class="status-unit">Ampere</div>
-      </div>
-      <div class="status-card power">
-        <h3>Daya</h3>
-        <div class="status-value" id="power">35</div>
-        <div class="status-unit">Watt</div>
-      </div>
-      <div class="status-card rpm">
-        <h3>Kecepatan Turbin</h3>
-        <div class="status-value" id="rpm">450</div>
-        <div class="status-unit">RPM</div>
-      </div>
-    </div>
-
-    <!-- Chart + Summary -->
-    <div class="grid">
-      <div class="chart-container">
-        <div class="chart-tabs">
-            <button class="tab-button active" onclick="switchChart('realtime', this)">Real-time</button>
-            <button class="tab-button" onclick="switchChart('daily', this)">Harian</button>
-            <button class="tab-button" onclick="switchChart('weekly', this)">Mingguan</button>
-
-        </div>
-        <h2>Grafik Monitoring Real-time</h2>
-        <canvas id="realtimeChart"></canvas>
-      </div>
-
-      <div class="summary-cards">
-        <div class="summary-card">
-          <h3>Durasi Penggunaan Hari Ini</h3>
-          <div class="summary-value" id="duration">14.5</div>
-          <div class="status-unit">Jam</div>
-        </div>
-        <div class="summary-card">
-          <h3>Total Daya Dihasilkan</h3>
-          <div class="summary-value" id="totalPower">847</div>
-          <div class="status-unit">kWh</div>
-        </div>
-        <div class="summary-card">
-          <h3>Efisiensi</h3>
-          <div class="summary-value" id="efficiency">87</div>
-          <div class="status-unit">%</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- AI Assistant -->
-    <div class="ai-assistant">
-      <h2>🤖 AI Assistant - Agnivolt</h2>
-      <div class="ai-chat">
-        <div class="chat-messages" id="chatMessages">
-          <div class="message">
-            <strong>Agnivolt AI:</strong> Selamat datang! Saya adalah asisten AI untuk sistem PLTMH Anda. Bagaimana saya bisa membantu Anda hari ini?
-          </div>
-        </div>
-        <div class="chat-input">
-          <input type="text" id="chatInput" placeholder="Tanyakan tentang sistem PLTMH Anda...">
-          <button onclick="sendMessage()">➤</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Mini Avatar -->
-    <div class="user-avatar" id="miniAvatar"></div>
-  </div>
 
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

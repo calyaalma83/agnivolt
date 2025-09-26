@@ -140,12 +140,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const input = document.getElementById("chatInput");
     const msg = input.value.trim();
     if (!msg) return;
-    addMessage("user", msg);
-    setTimeout(() => addMessage("ai", generateAIResponse(msg)), 1000);
+
+    // inisial user dari miniAvatar
+    const userInitial = document.getElementById("miniAvatar")?.textContent || "U";
+
+    addMessage("user", msg, userInitial);
+    setTimeout(() => addMessage("ai", generateAIResponse(msg), "🤖"), 800);
+
     input.value = "";
   }
 
-  function addMessage(sender, text) {
+  function addMessage(sender, text, avatarText) {
     const messagesDiv = document.getElementById("chatMessages");
 
     const row = document.createElement("div");
@@ -153,7 +158,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const avatar = document.createElement("div");
     avatar.className = "message-avatar";
-    avatar.textContent = sender === "ai" ? "🤖" : "A"; // bisa diganti inisial user
+    avatar.textContent = avatarText || (sender === "ai" ? "🤖" : "U");
 
     const bubble = document.createElement("div");
     bubble.className = "message-bubble";
@@ -168,9 +173,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     messagesDiv.appendChild(row);
-
-    // Auto scroll ke bawah
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    messagesDiv.scrollTop = messagesDiv.scrollHeight; // auto scroll
   }
 
   function generateAIResponse(message) {
@@ -189,6 +192,21 @@ document.addEventListener("DOMContentLoaded", () => {
     if (e.key === "Enter") sendMessage();
   });
   window.sendMessage = sendMessage;
+
+  // === Toggle AI Overlay ===
+  const aiFab = document.getElementById("aiFab");
+  const aiOverlay = document.getElementById("aiOverlay");
+  const aiClose = document.getElementById("aiClose");
+
+  if (aiFab && aiOverlay && aiClose) {
+    aiFab.addEventListener("click", () => {
+      aiOverlay.style.display = "flex";
+    });
+
+    aiClose.addEventListener("click", () => {
+      aiOverlay.style.display = "none";
+    });
+  }
 
   // === Jalankan update realtime ===
   updateRealtimeData();
