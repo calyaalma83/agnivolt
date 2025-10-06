@@ -1,4 +1,4 @@
-import { auth } from "./firebase-init.js";
+import { auth } from "../firebase-init.js";
 import { 
   onAuthStateChanged, 
   deleteUser, 
@@ -34,7 +34,7 @@ onAuthStateChanged(auth, (user) => {
     profileAvatar.textContent = initial;
     profileAvatar.style.background = color;
   } else {
-    window.location.href = "register.html"; 
+    window.location.href = "./auth/register.html"; 
   }
 });
 
@@ -66,7 +66,7 @@ logoutBtn.addEventListener("click", async () => {
     // === HAPUS AKUN ===
     await deleteUser(user);
     alert("Akun berhasil dihapus!");
-    window.location.href = "register.html";
+    window.location.href = "./auth/register.html";
 
   } catch (err) {
     alert("Gagal hapus akun: " + err.message);

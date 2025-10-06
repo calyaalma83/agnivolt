@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Agnivolt - PLTMH Monitoring</title>
   <link rel="stylesheet" href="agnivolt.css">
+  <link rel="stylesheet" href="ai_assistant/ai.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -12,39 +13,49 @@
         <!-- Header dengan avatar -->
         <div class="header">
             <div class="header-top">
-                <div class="header-title">
-                    <h1>🌊 Agnivolt Dashboard</h1>
-                    <p>Sistem Monitoring Pembangkit Listrik Tenaga Mikrohidro Berbasis IoT
-                        <span class="status-indicator" title="Status: Online"></span>
-                    </p>
-                </div>
+                <!-- Logo di kiri -->
+                <img src="assets/logo.png" alt="Agnivolt Logo" class="logo">
+
+                <!-- Judul di kanan -->
+                <h1>
+                    Sistem Monitoring Pembangkit Listrik Tenaga Mikrohidro Berbasis IoT
+                    <span class="status-indicator"></span>
+                </h1>
             </div>
         </div>
 
         <!-- Status Cards -->
         <div class="status-bar">
             <div class="status-card voltage">
-                <h3>Tegangan</h3>
-                <div class="status-value" id="voltage">12.5</div>
-                <div class="status-unit">Volt</div>
+                <div class="status-info">
+                    <h3>Tegangan</h3>
+                    <div class="status-value" id="voltage">220.4</div>
+                    <div class="status-unit">Volt</div>
+                </div>
             </div>
             <div class="status-card current">
-                <h3>Arus</h3>
-                <div class="status-value" id="current">2.8</div>
-                <div class="status-unit">Ampere</div>
+                <div class="status-info">
+                    <h3>Arus Listrik</h3>
+                    <div class="status-value" id="current">4.57</div>
+                    <div class="status-unit">Ampere</div>
+                </div>
             </div>
             <div class="status-card power">
-                <h3>Daya</h3>
-                <div class="status-value" id="power">35</div>
-                <div class="status-unit">Watt</div>
+                <div class="status-info">
+                    <h3>Daya</h3>
+                    <div class="status-value" id="power">976</div>
+                    <div class="status-unit">Watt</div>
+                </div>
             </div>
             <div class="status-card rpm">
-                <h3>Kecepatan Turbin</h3>
-                <div class="status-value" id="rpm">450</div>
-                <div class="status-unit">RPM</div>
+                <div class="status-info">
+                    <h3>Kecepatan Turbin</h3>
+                    <div class="status-value" id="rpm">1189</div>
+                    <div class="status-unit">RPM</div>
+                </div>
             </div>
         </div>
-
+        
         <!-- Chart + Summary -->
         <div class="grid">
             <div class="chart-container">
@@ -80,7 +91,13 @@
         <div class="user-avatar" id="miniAvatar"></div>
 
         <!-- FAB AI Assistant -->
-        <div class="ai-fab" id="aiFab">🤖</div>
+        <button class="ai-button" id="aiFab">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="opacity:.95">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" 
+                      stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>AI Assistant</span>
+        </button>
 
         <!-- Overlay AI Assistant -->
         <div class="ai-overlay" id="aiOverlay">
@@ -102,9 +119,15 @@
         </div>
     </div>
 
+    <!-- Footer -->
+    <footer class="footer">
+        <p>© 2025 Agnivolt • Sistem Monitoring PLTMH Berbasis IoT</p>
+    </footer>
+
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <!-- Script utama -->
   <script type="module" src="agnivolt.js"></script>
+  <script type="module" src="ai_assistant/ai.js"></script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-import { auth } from "./firebase-init.js";
+import { auth } from "../firebase-init.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
 export function checkAuthState() {
@@ -6,7 +6,7 @@ export function checkAuthState() {
     if (user) {
       console.log("User logged in:", user.email);
       if (window.location.pathname.includes("login.html") || window.location.pathname.includes("register.html")) {
-        window.location.href = "agnivolt.html";
+        window.location.href = "../agnivolt.html";
       }
     } else {
       console.log("No user logged in");

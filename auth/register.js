@@ -1,4 +1,4 @@
-import { auth } from "./firebase-init.js";
+import { auth } from "../firebase-init.js";
 import { createUserWithEmailAndPassword, updateProfile, GoogleAuthProvider, signInWithPopup } 
   from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
@@ -20,7 +20,7 @@ document.getElementById("registerForm").addEventListener("submit", async (e) => 
     await updateProfile(userCredential.user, { displayName: name });
 
     alert("Registrasi berhasil!");
-    window.location.href = "agnivolt.html";
+    window.location.href = "../agnivolt.html";
   } catch (error) {
     alert("Registrasi gagal: " + error.message);
   }
@@ -32,7 +32,7 @@ document.getElementById("googleRegister").addEventListener("click", async () => 
   try {
     await signInWithPopup(auth, provider);
     alert("Google Auth berhasil!");
-    window.location.href = "agnivolt.html";
+    window.location.href = "../agnivolt.html";
   } catch (error) {
     alert("Google Auth gagal: " + error.message);
   }

@@ -2,24 +2,37 @@ import { auth } from "./firebase-init.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
 document.addEventListener("DOMContentLoaded", () => {
-  // === Avatar mini (inisial user) ===
   const miniAvatar = document.getElementById("miniAvatar");
 
   onAuthStateChanged(auth, (user) => {
     if (user) {
-      const name = user.displayName || user.email || "U";
-      miniAvatar.textContent = name.charAt(0).toUpperCase();
+      // ✅ Kalau sudah login
+      let initial = "?";
+      if (user.displayName && user.displayName.trim() !== "") {
+        initial = user.displayName.charAt(0).toUpperCase();
+      } else if (user.email) {
+        initial = user.email.charAt(0).toUpperCase();
+      }
+      miniAvatar.textContent = initial;
+
+      if (miniAvatar) {
+        miniAvatar.addEventListener("click", () => {
+          window.location.href = "./profile/profile.html";
+        });
+      }
+
+      // === Semua logic dashboard jalan hanya kalau sudah login ===
+      startDashboard();
+
     } else {
-      miniAvatar.textContent = "?";
+      // ❌ Kalau belum login → langsung tendang ke login.html
+      window.location.href = "./auth/login.html";
     }
   });
+});
 
-  if (miniAvatar) {
-    miniAvatar.addEventListener("click", () => {
-      window.location.href = "profile.html";
-    });
-  }
-
+// === Fungsi untuk inisialisasi dashboard ===
+function startDashboard() {
   // === DATA SIMULASI ===
   let realtimeData = { labels: [], voltage: [], current: [], power: [], rpm: [] };
 
@@ -57,7 +70,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // === SET DATA KE CHART ===
   function setChartData(source) {
     chart.data.labels = source.labels;
     chart.data.datasets = [
@@ -69,7 +81,6 @@ document.addEventListener("DOMContentLoaded", () => {
     chart.update();
   }
 
-  // === GENERATE DATA RANDOM ===
   function generateRandomData() {
     const voltage = 12 + Math.random() * 2;
     const current = 2.5 + Math.random() * 1;
@@ -78,7 +89,6 @@ document.addEventListener("DOMContentLoaded", () => {
     return { voltage, current, power, rpm };
   }
 
-  // === UPDATE REALTIME DATA ===
   function updateRealtimeData() {
     const now = new Date();
     const label = now.toLocaleTimeString();
@@ -103,20 +113,17 @@ document.addEventListener("DOMContentLoaded", () => {
       realtimeData.rpm.shift();
     }
 
-    // Update chart hanya kalau lagi di tab realtime
     const activeTab = document.querySelector(".tab-button.active");
     if (activeTab && activeTab.textContent.includes("Real-time")) {
       setChartData(realtimeData);
     }
 
-    // Ringkasan
     document.getElementById("duration").textContent = (now.getHours() + Math.random()).toFixed(1);
     const totalPower = parseFloat(document.getElementById("totalPower").textContent);
     document.getElementById("totalPower").textContent = (totalPower + data.power / 3600).toFixed(1);
     document.getElementById("efficiency").textContent = (85 + Math.random() * 10).toFixed(0);
   }
 
-  // === SWITCH CHART ===
   window.switchChart = (type, btn) => {
     document.querySelectorAll(".tab-button").forEach(b => b.classList.remove("active"));
     if (btn) btn.classList.add("active");
@@ -135,83 +142,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  // === AI Chat ===
-  function sendMessage() {
-    const input = document.getElementById("chatInput");
-    const msg = input.value.trim();
-    if (!msg) return;
-
-    // inisial user dari miniAvatar
-    const userInitial = document.getElementById("miniAvatar")?.textContent || "U";
-
-    addMessage("user", msg, userInitial);
-    setTimeout(() => addMessage("ai", generateAIResponse(msg), "🤖"), 800);
-
-    input.value = "";
-  }
-
-  function addMessage(sender, text, avatarText) {
-    const messagesDiv = document.getElementById("chatMessages");
-
-    const row = document.createElement("div");
-    row.className = `message-row ${sender}`;
-
-    const avatar = document.createElement("div");
-    avatar.className = "message-avatar";
-    avatar.textContent = avatarText || (sender === "ai" ? "🤖" : "U");
-
-    const bubble = document.createElement("div");
-    bubble.className = "message-bubble";
-    bubble.innerHTML = text;
-
-    if (sender === "ai") {
-      row.appendChild(avatar);
-      row.appendChild(bubble);
-    } else {
-      row.appendChild(bubble);
-      row.appendChild(avatar);
-    }
-
-    messagesDiv.appendChild(row);
-    messagesDiv.scrollTop = messagesDiv.scrollHeight; // auto scroll
-  }
-
-  function generateAIResponse(message) {
-    const responses = {
-      status: "Sistem PLTMH beroperasi normal. Efisiensi 87%, tegangan 12.5V, RPM 450.",
-      masalah: "Tidak ada masalah terdeteksi. Sistem berjalan optimal.",
-      maintenance: "Maintenance terakhir 2 minggu lalu. Berikutnya dijadwalkan 4 minggu lagi.",
-      efisiensi: "Efisiensi saat ini 87%. Pastikan saluran air bersih dari sampah untuk hasil lebih baik.",
-      daya: `Total daya hari ini ${document.getElementById("totalPower").textContent} kWh.`
-    };
-    const key = Object.keys(responses).find(k => message.toLowerCase().includes(k));
-    return key ? responses[key] : "Terima kasih. Untuk info detail, hubungi admin atau lihat dokumentasi Agnivolt.";
-  }
-
-  document.getElementById("chatInput").addEventListener("keypress", e => {
-    if (e.key === "Enter") sendMessage();
-  });
-  window.sendMessage = sendMessage;
-
-  // === Toggle AI Overlay ===
-  const aiFab = document.getElementById("aiFab");
-  const aiOverlay = document.getElementById("aiOverlay");
-  const aiClose = document.getElementById("aiClose");
-
-  if (aiFab && aiOverlay && aiClose) {
-    aiFab.addEventListener("click", () => {
-      aiOverlay.style.display = "flex";
-    });
-
-    aiClose.addEventListener("click", () => {
-      aiOverlay.style.display = "none";
-    });
-  }
-
   // === Jalankan update realtime ===
   updateRealtimeData();
   setInterval(updateRealtimeData, 3000);
 
   // Default tampilan realtime
   setChartData(realtimeData);
-});
+}

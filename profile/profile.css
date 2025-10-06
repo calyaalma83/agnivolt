@@ -1,11 +1,16 @@
-body {
+*{
   font-family: 'Inter', sans-serif;
+  box-sizing: border-box;
+}
+
+body {
   background: #050170;
   min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: flex-start;
   padding: 40px 15px;
+  margin: 0;
 }
 
 .container {
@@ -21,6 +26,10 @@ body {
   text-align: center;
   color: white;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.header h1 {
+  font-size: 30px;
 }
 
 .profile-card {
@@ -105,4 +114,40 @@ html, body {
 img, svg {
     max-width: 100%;
     height: auto;
+}
+
+@media (max-width: 480px) {
+  body {
+    padding: 20px 10px;
+  }
+
+  .header h1 {
+    font-size: 20px;
+  }
+
+  .avatar-large {
+    width: 90px;
+    height: 90px;
+    font-size: 2.2rem;
+  }
+
+  .profile-card h2 {
+    font-size: 1.1rem;
+  }
+
+  .profile-card p {
+    font-size: 0.9rem;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    width: 100%;
+    padding: 12px;
+    font-size: 0.95rem;
+  }
+
+  .profile-actions {
+    flex-direction: column;
+    gap: 10px;
+  }
 }
