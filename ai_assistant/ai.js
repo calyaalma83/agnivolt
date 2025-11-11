@@ -1,70 +1,139 @@
-// === AI Chat ===
-  function sendMessage() {
-    const input = document.getElementById("chatInput");
-    const msg = input.value.trim();
-    if (!msg) return;
+let messages = [
+  {
+    sender: "ai",
+    text: "Selamat datang! Saya adalah asisten AI untuk sistem PLTMH Anda. Bagaimana saya bisa membantu Anda hari ini?",
+    avatar: "🤖",
+  },
+];
 
-    const userInitial = document.getElementById("miniAvatar")?.textContent || "U";
+let isLoading = false;
+let userInitial = "U";
 
-    addMessage("user", msg, userInitial);
-    setTimeout(() => addMessage("ai", generateAIResponse(msg), "🤖"), 800);
+const GEMINI_API_KEY = "AIzaSyAEGw7E0699PjTBJfUkdnOzN9A5GxE2KTI";
+const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GEMINI_API_KEY}`;
 
-    input.value = "";
-  }
+// === Fungsi utama ===
 
-  function addMessage(sender, text, avatarText) {
-    const messagesDiv = document.getElementById("chatMessages");
+// Render pesan ke tampilan
+function renderMessages() {
+  const chatMessages = document.getElementById("chatMessages");
+  chatMessages.innerHTML = "";
 
+  messages.forEach((msg) => {
     const row = document.createElement("div");
-    row.className = `message-row ${sender}`;
+    row.classList.add("message-row", msg.sender);
 
     const avatar = document.createElement("div");
-    avatar.className = "message-avatar";
-    avatar.textContent = avatarText || (sender === "ai" ? "🤖" : "U");
+    avatar.classList.add("message-avatar");
+    avatar.textContent = msg.avatar;
 
     const bubble = document.createElement("div");
-    bubble.className = "message-bubble";
-    bubble.innerHTML = text;
+    bubble.classList.add("message-bubble");
+    bubble.innerHTML = msg.text;
 
-    if (sender === "ai") {
-      row.appendChild(avatar);
-      row.appendChild(bubble);
-    } else {
-      row.appendChild(bubble);
-      row.appendChild(avatar);
-    }
+    row.appendChild(avatar);
+    row.appendChild(bubble);
 
-    messagesDiv.appendChild(row);
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
-  }
-
-  function generateAIResponse(message) {
-    const responses = {
-      status: "Sistem PLTMH beroperasi normal. Efisiensi 87%, tegangan 12.5V, RPM 450.",
-      masalah: "Tidak ada masalah terdeteksi. Sistem berjalan optimal.",
-      maintenance: "Maintenance terakhir 2 minggu lalu. Berikutnya dijadwalkan 4 minggu lagi.",
-      efisiensi: "Efisiensi saat ini 87%. Pastikan saluran air bersih dari sampah untuk hasil lebih baik.",
-      daya: `Total daya hari ini ${document.getElementById("totalPower").textContent} kWh.`
-    };
-    const key = Object.keys(responses).find(k => message.toLowerCase().includes(k));
-    return key ? responses[key] : "Terima kasih. Untuk info detail, hubungi admin atau lihat dokumentasi Agnivolt.";
-  }
-
-  document.getElementById("chatInput").addEventListener("keypress", e => {
-    if (e.key === "Enter") sendMessage();
+    chatMessages.appendChild(row);
   });
-  window.sendMessage = sendMessage;
 
-  const aiFab = document.getElementById("aiFab");
-  const aiOverlay = document.getElementById("aiOverlay");
-  const aiClose = document.getElementById("aiClose");
+  // Scroll ke bawah
+  scrollToBottom();
+}
 
-  if (aiFab && aiOverlay && aiClose) {
-    aiFab.addEventListener("click", () => {
-      aiOverlay.style.display = "flex";
+// Scroll otomatis ke bawah
+function scrollToBottom() {
+  const chatMessages = document.getElementById("chatMessages");
+  setTimeout(() => {
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }, 100);
+}
+
+// Tutup sidebar (bisa disesuaikan)
+function closeChat() {
+  const sidebar = document.querySelector(".ai-sidebar");
+  const backdrop = document.querySelector(".sidebar-backdrop");
+  sidebar.style.display = "none";
+  backdrop.style.display = "none";
+}
+
+// Kirim pesan user
+async function sendMessage() {
+  const input = document.getElementById("chatInput");
+  const msg = input.value.trim();
+  if (!msg) return;
+
+  messages.push({ sender: "user", text: msg, avatar: userInitial });
+  renderMessages();
+  input.value = "";
+
+  showLoading(true);
+
+  try {
+    const response = await generateAIResponse(msg);
+    messages.push({ sender: "ai", text: response, avatar: "🤖" });
+    renderMessages();
+  } catch (err) {
+    console.error(err);
+    messages.push({
+      sender: "ai",
+      text: "Maaf, terjadi kesalahan. Silakan coba lagi.",
+      avatar: "🤖",
     });
-
-    aiClose.addEventListener("click", () => {
-      aiOverlay.style.display = "none";
-    });
+    renderMessages();
+  } finally {
+    showLoading(false);
   }
+}
+
+// Tampilkan animasi loading
+function showLoading(show) {
+  const loading = document.getElementById("loading");
+  loading.style.display = show ? "flex" : "none";
+  isLoading = show;
+  scrollToBottom();
+}
+
+// Fungsi untuk minta respons AI
+async function generateAIResponse(message) {
+  const systemContext = `
+Anda adalah asisten AI untuk sistem monitoring PLTMH (Pembangkit Listrik Tenaga Mikro Hidro) bernama Agnivolt.
+
+Tugas Anda:
+1. Membantu user memahami data monitoring PLTMH
+2. Memberikan insight tentang performa sistem
+3. Menjawab pertanyaan tentang status, efisiensi, dan kondisi PLTMH
+4. Memberikan saran maintenance jika diperlukan
+5. Menjelaskan data dengan bahasa yang mudah dipahami
+
+Jawab pertanyaan user dengan singkat, jelas, dan profesional dalam Bahasa Indonesia.
+`;
+
+  const body = {
+    contents: [
+      {
+        parts: [{ text: systemContext + "\n\nPertanyaan user: " + message }],
+      },
+    ],
+    generationConfig: { temperature: 0.7, maxOutputTokens: 500 },
+  };
+
+  const res = await fetch(GEMINI_API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    throw new Error(`HTTP error ${res.status}: ${errorText}`);
+  }
+
+  const data = await res.json();
+  return data.candidates?.[0]?.content?.parts?.[0]?.text || "Tidak ada respons dari AI.";
+}
+
+// Render pertama kali saat halaman dibuka
+window.addEventListener("DOMContentLoaded", () => {
+  renderMessages();
+});

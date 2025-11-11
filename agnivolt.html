@@ -7,127 +7,170 @@
   <link rel="stylesheet" href="agnivolt.css">
   <link rel="stylesheet" href="ai_assistant/ai.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <div class="container">
-        <!-- Header dengan avatar -->
-        <div class="header">
-            <div class="header-top">
-                <!-- Logo di kiri -->
-                <img src="assets/logo.png" alt="Agnivolt Logo" class="logo">
-
-                <!-- Judul di kanan -->
-                <h1>
-                    Sistem Monitoring Pembangkit Listrik Tenaga Mikrohidro Berbasis IoT
-                    <span class="status-indicator"></span>
-                </h1>
-            </div>
-        </div>
-
-        <!-- Status Cards -->
-        <div class="status-bar">
-            <div class="status-card voltage">
-                <div class="status-info">
-                    <h3>Tegangan</h3>
-                    <div class="status-value" id="voltage">220.4</div>
-                    <div class="status-unit">Volt</div>
-                </div>
-            </div>
-            <div class="status-card current">
-                <div class="status-info">
-                    <h3>Arus Listrik</h3>
-                    <div class="status-value" id="current">4.57</div>
-                    <div class="status-unit">Ampere</div>
-                </div>
-            </div>
-            <div class="status-card power">
-                <div class="status-info">
-                    <h3>Daya</h3>
-                    <div class="status-value" id="power">976</div>
-                    <div class="status-unit">Watt</div>
-                </div>
-            </div>
-            <div class="status-card rpm">
-                <div class="status-info">
-                    <h3>Kecepatan Turbin</h3>
-                    <div class="status-value" id="rpm">1189</div>
-                    <div class="status-unit">RPM</div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Chart + Summary -->
-        <div class="grid">
-            <div class="chart-container">
-                <div class="chart-tabs">
-                    <button class="tab-button active" onclick="switchChart('realtime', this)">Real-time</button>
-                    <button class="tab-button" onclick="switchChart('daily', this)">Harian</button>
-                    <button class="tab-button" onclick="switchChart('weekly', this)">Mingguan</button>
-                </div>
-                <h2>Grafik Monitoring Real-time</h2>
-                <canvas id="realtimeChart"></canvas>
-            </div>
-
-            <div class="summary-cards">
-                <div class="summary-card">
-                    <h3>Durasi Penggunaan Hari Ini</h3>
-                    <div class="summary-value" id="duration">14.5</div>
-                    <div class="status-unit">Jam</div>
-                </div>
-                <div class="summary-card">
-                    <h3>Total Daya Dihasilkan</h3>
-                    <div class="summary-value" id="totalPower">847</div>
-                    <div class="status-unit">kWh</div>
-                </div>
-                <div class="summary-card">
-                    <h3>Efisiensi</h3>
-                    <div class="summary-value" id="efficiency">87</div>
-                    <div class="status-unit">%</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Mini Avatar -->
-        <div class="user-avatar" id="miniAvatar"></div>
-
-        <!-- FAB AI Assistant -->
-        <button class="ai-button" id="aiFab">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="opacity:.95">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" 
-                      stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            <span>AI Assistant</span>
-        </button>
-
-        <!-- Overlay AI Assistant -->
-        <div class="ai-overlay" id="aiOverlay">
-            <div class="ai-card">
-                <button class="ai-close" id="aiClose">✖</button>
-                <h2>🤖 AI Assistant - Agnivolt</h2>
-                <div class="ai-chat">
-                    <div class="chat-messages" id="chatMessages">
-                        <div class="message ai">
-                            <strong>Agnivolt AI:</strong> Selamat datang! Saya adalah asisten AI untuk sistem PLTMH Anda. Bagaimana saya bisa membantu Anda hari ini? 
+    <div class="dashboard-container">
+        <div class="container">
+            <div class="header">
+                <div class="header-top">
+                    <div class="header-left">
+                        <img src="assets/logo.png" class="logo">
+                        <div class="header-title-wrapper">
+                            <h1>Sistem Monitoring PLTMH Berbasis IoT</h1>
+                            <div id="connectionIndicator" class="connection-indicator">
+                                <span id="indicatorDot" class="dot"></span>
+                                <span id="indicatorText">Cek koneksi...</span>
+                            </div>
                         </div>
                     </div>
-                    <div class="chat-input">
-                        <input type="text" id="chatInput" placeholder="Tanyakan tentang sistem PLTMH Anda...">
-                        <button onclick="sendMessage()">➤</button>
+
+                    <div class="header-right">
+                        <div class="user-info" id="userInfoButton">
+                            <div class="user-details">
+                                <span class="greeting">Halo,</span>
+                                <span class="user-name">Pengguna Uji Coba</span> 
+                            </div>
+                            <div class="user-avatar-header">PU</div> 
+                            <ion-icon name="chevron-down-outline" class="dropdown-icon" id="dropdownIcon"></ion-icon>
+                        </div>
+
+                        <div class="profile-dropdown" id="profileDropdown">
+                            <div class="dropdown-item">
+                                <ion-icon name="person-outline"></ion-icon>
+                                <span>Profil Saya</span>
+                            </div>
+                            <div class="dropdown-item">
+                                <ion-icon name="settings-outline"></ion-icon>
+                                <span>Pengaturan</span>
+                            </div>
+                            <div class="dropdown-divider"></div>
+                            <div class="dropdown-item logout">
+                                <ion-icon name="log-out-outline"></ion-icon>
+                                <span>Keluar</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="status-bar">
+                <div class="status-card voltage">
+                    <div class="status-info">
+                        <h3>Tegangan</h3>
+                        <div class="status-value" id="voltage">0</div> 
+                        <div class="status-unit">Volt</div>
+                    </div>
+                </div>
+                <div class="status-card current">
+                    <div class="status-info">
+                        <h3>Arus Listrik</h3>
+                        <div class="status-value" id="current">0</div> 
+                        <div class="status-unit">Ampere</div>
+                    </div>
+                </div>
+                <div class="status-card power">
+                    <div class="status-info">
+                        <h3>Daya</h3>
+                        <div class="status-value" id="power">0</div> 
+                        <div class="status-unit">Watt</div>
+                    </div>
+                </div>
+                <div class="status-card rpm">
+                    <div class="status-info">
+                        <h3>Kecepatan Turbin</h3>
+                        <div class="status-value" id="rpm">1500</div> <div class="status-unit">RPM</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid">
+                <div class="chart-container">
+                    <div class="chart-tabs">
+                        <button class="tab-button active" data-chart-type="realtime">Real-time</button>
+                        <button class="tab-button" data-chart-type="daily">Harian</button>
+                        <button class="tab-button" data-chart-type="weekly">Mingguan</button>
+                    </div>
+                    <h2 id="chartTitle">Real-time Data</h2> 
+                    <canvas id="realtimeChart"></canvas>
+                </div>
+
+                <div class="summary-cards">
+                    <div class="summary-card">
+                        <h3>Durasi Penggunaan Hari Ini</h3>
+                        <div class="summary-value" id="duration">0</div> 
+                        <div class="status-unit">Jam</div>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Total Daya Dihasilkan</h3>
+                        <div class="summary-value" id="totalPower">0</div> 
+                        <div class="status-unit">kWh</div>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Efisiensi</h3>
+                        <div class="summary-value" id="efficiency">0</div> 
+                        <div class="status-unit">%</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="fab-container">
+                <button class="ai-fab" id="openAiAssistantButton">
+                    <ion-icon name="chatbubbles-outline"></ion-icon>
+                </button>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <p>© 2025 Agnivolt • Sistem Monitoring PLTMH Berbasis IoT</p>
+        </footer>
+
+        <div class="ai-overlay" id="aiOverlay">
+            <div class="ai-backdrop" id="aiBackdrop"></div>
+
+            <div class="ai-sidebar">
+                <div class="sidebar-header">
+                    <div class="sidebar-title">
+                        <ion-icon name="chatbubbles" class="header-icon"></ion-icon>
+                        <h2>AI Assistant</h2>
+                    </div>
+                    <button class="close-btn" id="closeAiAssistantButton">
+                        <ion-icon name="close-outline"></ion-icon>
+                    </button>
+                </div>
+
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message-row ai">
+                        <div class="message-avatar">🤖</div>
+                        <div class="message-bubble">Halo! Saya AI Assistant Anda. Ada yang bisa saya bantu terkait monitoring PLTMH Anda?</div>
+                    </div>
+                    <div class="message-row user">
+                        <div class="message-avatar">PU</div>
+                        <div class="message-bubble">Berapa tegangan saat ini?</div>
+                    </div>
+                    <div class="message-row ai">
+                        <div class="message-avatar">🤖</div>
+                        <div class="message-bubble">Berdasarkan data terakhir, tegangan saat ini adalah **220.5 Volt**.</div>
+                    </div>
+                </div>
+
+                <div class="chat-footer">
+                    <div class="chat-input-wrapper">
+                        <input type="text" id="chatInput" placeholder="Tanyakan tentang PLTMH..." class="chat-input">
+                        <button class="send-btn" id="sendAiMessageButton" disabled>
+                            <ion-icon name="send"></ion-icon>
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <p>© 2025 Agnivolt • Sistem Monitoring PLTMH Berbasis IoT</p>
-    </footer>
-
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- Script utama -->
-  <script type="module" src="agnivolt.js"></script>
-  <script type="module" src="ai_assistant/ai.js"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Script utama -->
+    <script type="module" src="agnivolt.js"></script>
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
 </body>
 </html>

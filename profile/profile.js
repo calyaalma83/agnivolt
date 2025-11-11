@@ -8,10 +8,11 @@ import {
   reauthenticateWithPopup
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
-const profileName = document.getElementById("profileName");
-const profileEmail = document.getElementById("profileEmail");
-const profileAvatar = document.getElementById("profileAvatar");
-const logoutBtn = document.getElementById("logoutBtn");
+const profileName = document.getElementById("userName");
+const profileEmail = document.getElementById("userEmail");
+const profileAvatar = document.getElementById("avatarLarge");
+const logoutBtn = document.getElementById("deleteAccountBtn");
+const backDashboardBtn = document.getElementById("backDashboardBtn");
 
 const colors = ["#f44336", "#e91e63", "#9c27b0", "#3f51b5", "#2196f3", "#009688", "#4caf50", "#ff9800", "#795548"];
 
@@ -33,8 +34,9 @@ onAuthStateChanged(auth, (user) => {
     profileEmail.textContent = email;
     profileAvatar.textContent = initial;
     profileAvatar.style.background = color;
+    
   } else {
-    window.location.href = "./auth/register.html"; 
+    window.location.href = "../register/register.html"; 
   }
 });
 
@@ -47,28 +49,28 @@ logoutBtn.addEventListener("click", async () => {
   if (!yakin) return;
 
   try {
-    // Cek provider user
     const providerId = user.providerData[0]?.providerId;
 
     if (providerId === "google.com") {
-      // 🔑 Reauth pakai Google
       const provider = new GoogleAuthProvider();
       await reauthenticateWithPopup(user, provider);
     } else {
-      // 🔑 Reauth pakai email & password
       const password = prompt("Masukkan password untuk konfirmasi hapus akun:");
       if (!password) return alert("Password diperlukan untuk hapus akun.");
-
       const credential = EmailAuthProvider.credential(user.email, password);
       await reauthenticateWithCredential(user, credential);
     }
 
-    // === HAPUS AKUN ===
     await deleteUser(user);
     alert("Akun berhasil dihapus!");
-    window.location.href = "./auth/register.html";
+    window.location.href = "../register/register.html";
 
   } catch (err) {
     alert("Gagal hapus akun: " + err.message);
   }
+});
+
+// === BUTTON KEMBALI KE DASHBOARD ===
+backDashboardBtn.addEventListener("click", () => {
+  window.location.href = "../agnivolt.html"; 
 });
