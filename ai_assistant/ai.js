@@ -1,139 +1,139 @@
-let messages = [
-  {
-    sender: "ai",
-    text: "Selamat datang! Saya adalah asisten AI untuk sistem PLTMH Anda. Bagaimana saya bisa membantu Anda hari ini?",
-    avatar: "🤖",
-  },
-];
+import { GoogleGenerativeAI } from "https://esm.run/@google/generative-ai";
+import showdown from "https://esm.run/showdown";
 
-let isLoading = false;
-let userInitial = "U";
+const converter = new showdown.Converter();
 
-const GEMINI_API_KEY = "AIzaSyAEGw7E0699PjTBJfUkdnOzN9A5GxE2KTI";
-const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GEMINI_API_KEY}`;
+// === KONSTANTA AI ===
+// Catatan: Mengekspos API Key di sisi klien tidak aman dan dapat menyebabkan penyalahgunaan.
+const GEMINI_API_KEY = "AIzaSyAEGw7E0699PjTBJfUkdnOzN9A5GxE2KTI"; 
+const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+// Menggunakan model yang Anda sarankan. Jika terjadi error 404, model ini mungkin tidak tersedia untuk API key Anda.
+const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
-// === Fungsi utama ===
-
-// Render pesan ke tampilan
-function renderMessages() {
-  const chatMessages = document.getElementById("chatMessages");
-  chatMessages.innerHTML = "";
-
-  messages.forEach((msg) => {
-    const row = document.createElement("div");
-    row.classList.add("message-row", msg.sender);
-
-    const avatar = document.createElement("div");
-    avatar.classList.add("message-avatar");
-    avatar.textContent = msg.avatar;
-
-    const bubble = document.createElement("div");
-    bubble.classList.add("message-bubble");
-    bubble.innerHTML = msg.text;
-
-    row.appendChild(avatar);
-    row.appendChild(bubble);
-
-    chatMessages.appendChild(row);
-  });
-
-  // Scroll ke bawah
-  scrollToBottom();
-}
-
-// Scroll otomatis ke bawah
-function scrollToBottom() {
-  const chatMessages = document.getElementById("chatMessages");
-  setTimeout(() => {
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-  }, 100);
-}
-
-// Tutup sidebar (bisa disesuaikan)
-function closeChat() {
-  const sidebar = document.querySelector(".ai-sidebar");
-  const backdrop = document.querySelector(".sidebar-backdrop");
-  sidebar.style.display = "none";
-  backdrop.style.display = "none";
-}
-
-// Kirim pesan user
-async function sendMessage() {
-  const input = document.getElementById("chatInput");
-  const msg = input.value.trim();
-  if (!msg) return;
-
-  messages.push({ sender: "user", text: msg, avatar: userInitial });
-  renderMessages();
-  input.value = "";
-
-  showLoading(true);
-
-  try {
-    const response = await generateAIResponse(msg);
-    messages.push({ sender: "ai", text: response, avatar: "🤖" });
-    renderMessages();
-  } catch (err) {
-    console.error(err);
-    messages.push({
-      sender: "ai",
-      text: "Maaf, terjadi kesalahan. Silakan coba lagi.",
-      avatar: "🤖",
-    });
-    renderMessages();
-  } finally {
-    showLoading(false);
-  }
-}
-
-// Tampilkan animasi loading
-function showLoading(show) {
-  const loading = document.getElementById("loading");
-  loading.style.display = show ? "flex" : "none";
-  isLoading = show;
-  scrollToBottom();
-}
-
-// Fungsi untuk minta respons AI
+/**
+ * Menghasilkan respons dari AI berdasarkan pesan pengguna.
+ * @param {string} message Pesan dari pengguna.
+ * @returns {Promise<string>} Respons dari AI dalam format Markdown.
+ */
 async function generateAIResponse(message) {
-  const systemContext = `
-Anda adalah asisten AI untuk sistem monitoring PLTMH (Pembangkit Listrik Tenaga Mikro Hidro) bernama Agnivolt.
+    const systemContext = `
+Anda adalah asisten AI untuk sistem monitoring PLTMH bernama Agnivolt.
+Tugas Anda adalah membantu pengguna memahami data monitoring, menjelaskan performa sistem, dan memberi insight atau saran maintenance jika perlu.
+Gunakan Bahasa Indonesia yang jelas, profesional, dan ramah.
 
-Tugas Anda:
-1. Membantu user memahami data monitoring PLTMH
-2. Memberikan insight tentang performa sistem
-3. Menjawab pertanyaan tentang status, efisiensi, dan kondisi PLTMH
-4. Memberikan saran maintenance jika diperlukan
-5. Menjelaskan data dengan bahasa yang mudah dipahami
+PENTING: Format selalu respons Anda menggunakan MARKDOWN untuk membuat jawaban lebih terstruktur dan mudah dibaca.
+Gunakan elemen-elemen berikut:
+- **Teks tebal** untuk penekanan.
+- *Teks miring* untuk istilah.
+- Bullet points (menggunakan tanda hubung '-' atau bintang '*') untuk daftar.
+- Heading (menggunakan '##') untuk judul bagian.
 
-Jawab pertanyaan user dengan singkat, jelas, dan profesional dalam Bahasa Indonesia.
+Contoh Respons:
+## Analisis Performa Harian
+Berikut adalah analisis performa sistem PLTMH Anda hari ini:
+- **Tegangan**: Terpantau stabil di angka *220V*.
+- **Daya Rata-rata**: Sekitar *1500W*, ini menunjukkan performa yang sangat bagus!
 `;
 
-  const body = {
-    contents: [
-      {
-        parts: [{ text: systemContext + "\n\nPertanyaan user: " + message }],
-      },
-    ],
-    generationConfig: { temperature: 0.7, maxOutputTokens: 500 },
-  };
+    const prompt = `${systemContext}\n\nPertanyaan Pengguna: ${message}`;
 
-  const res = await fetch(GEMINI_API_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-
-  if (!res.ok) {
-    const errorText = await res.text();
-    throw new Error(`HTTP error ${res.status}: ${errorText}`);
-  }
-
-  const data = await res.json();
-  return data.candidates?.[0]?.content?.parts?.[0]?.text || "Tidak ada respons dari AI.";
+    try {
+      const result = await model.generateContent(prompt);
+      const response = await result.response;
+      return response.text() || "Tidak ada respons dari AI.";
+    } catch (error) {
+      console.error("AI Response Error:", error);
+      if (error.message.includes("404")) {
+          return `**Error**: Model AI ('gemini-2.0-flash') tidak ditemukan. Ini berarti model tersebut tidak tersedia untuk API Key Anda.`;
+      }
+      if (error.message.includes("429")) {
+          return `**Error**: Terlalu banyak permintaan ke AI dalam waktu singkat. Kuota Anda mungkin habis. Silakan coba lagi nanti.`;
+      }
+      return `**Error**: Terjadi kesalahan saat menghubungi AI. Silakan periksa konsol untuk detailnya.`;
+    }
 }
 
-// Render pertama kali saat halaman dibuka
-window.addEventListener("DOMContentLoaded", () => {
-  renderMessages();
-});
+/**
+ * Menambahkan pesan ke dalam kotak chat dan merender Markdown untuk respons AI.
+ * @param {('user'|'ai')} sender Pengirim pesan.
+ * @param {string} text Isi pesan (bisa berupa Markdown untuk AI).
+ * @param {string} avatar Teks atau emoji untuk avatar.
+ */
+function appendMessage(sender, text, avatar) {
+    const chatMessages = document.getElementById("chatMessages");
+    if (!chatMessages) return;
+
+    const msgRow = document.createElement("div");
+    msgRow.className = `message-row ${sender}`;
+    
+    const bubbleHtml = sender === 'ai' 
+      ? converter.makeHtml(text) 
+      : text.replace(/</g, "&lt;").replace(/>/g, "&gt;"); // Basic escaping for user text
+
+    msgRow.innerHTML = `
+      <div class="message-avatar">${avatar}</div>
+      <div class="message-bubble">${bubbleHtml}</div>`;
+      
+    chatMessages.appendChild(msgRow);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+/**
+ * Menginisialisasi semua fungsionalitas AI Assistant.
+ * @param {string} userAvatarInitial Inisial pengguna untuk ditampilkan sebagai avatar.
+ */
+export function initAiAssistant(userAvatarInitial) {
+    const openAiBtn = document.getElementById("openAiAssistantButton");
+    const closeAiBtn = document.getElementById("closeAiAssistantButton");
+    const aiOverlay = document.getElementById("aiOverlay");
+    const aiBackdrop = document.getElementById("aiBackdrop");
+    const chatInput = document.getElementById("chatInput");
+    const sendBtn = document.getElementById("sendAiMessageButton");
+
+    if (!openAiBtn || !closeAiBtn || !aiOverlay || !aiBackdrop || !chatInput || !sendBtn) {
+        console.warn("Beberapa elemen UI untuk AI Assistant tidak ditemukan. Fungsi AI tidak akan berjalan.");
+        return;
+    }
+
+    openAiBtn.addEventListener("click", () => aiOverlay.classList.add("show"));
+    closeAiBtn.addEventListener("click", () => aiOverlay.classList.remove("show"));
+    aiBackdrop.addEventListener("click", () => aiOverlay.classList.remove("show"));
+
+    chatInput.addEventListener("input", () => sendBtn.disabled = !chatInput.value.trim());
+
+    const handleSendMessage = async () => {
+        const msg = chatInput.value.trim();
+        if (!msg || sendBtn.disabled) return;
+
+        appendMessage("user", msg, userAvatarInitial);
+        chatInput.value = "";
+        sendBtn.disabled = true;
+
+        // Menampilkan indikator "mengetik" dari AI
+        appendMessage("ai", "...", "🤖");
+        const loadingBubble = document.querySelector(".message-row:last-child .message-bubble");
+        if(loadingBubble) loadingBubble.classList.add("typing-indicator");
+
+
+        const response = await generateAIResponse(msg);
+
+        // Menghapus indikator "mengetik" dan menggantinya dengan respons asli
+        if(loadingBubble) {
+            loadingBubble.classList.remove("typing-indicator");
+            loadingBubble.innerHTML = converter.makeHtml(response);
+        } else {
+            appendMessage("ai", response, "🤖");
+        }
+        
+        sendBtn.disabled = !chatInput.value.trim();
+    };
+
+    sendBtn.addEventListener("click", handleSendMessage);
+
+    chatInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          handleSendMessage();
+        }
+    });
+}
