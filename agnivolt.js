@@ -2,18 +2,12 @@ import { db } from "./firebase-init.js";
 import { ref, onValue } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
 import { auth } from "./firebase-init.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
-
-// === KONSTANTA AI ===
-const GEMINI_API_KEY = "AIzaSyBE_27Q5mMbOOzXDbnTpSarb69xMoBrppo";
-const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GEMINI_API_KEY}`;
+import { initAiAssistant } from "./ai_assistant/ai.js";
 
 // === Saat halaman siap ===
 document.addEventListener("DOMContentLoaded", () => {
   const miniAvatar = document.querySelector(".user-avatar-header");
   const userNameEl = document.querySelector(".user-name");
-  const chatMessages = document.getElementById("chatMessages");
-  const chatInput = document.getElementById("chatInput");
-  const sendBtn = document.getElementById("sendAiMessageButton");
 
   // ======== CONNECTION INDICATOR ========
   const indicator = document.getElementById("connectionIndicator");
@@ -34,12 +28,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Tombol AI Assistant
-  const openAiBtn = document.getElementById("openAiAssistantButton");
-  const closeAiBtn = document.getElementById("closeAiAssistantButton");
-  const aiOverlay = document.getElementById("aiOverlay");
-  const aiBackdrop = document.getElementById("aiBackdrop");
-
   // === LOGIN CHECK ===
   onAuthStateChanged(auth, (user) => {
     if (user) {
@@ -51,7 +39,8 @@ document.addEventListener("DOMContentLoaded", () => {
       miniAvatar.style.visibility = "visible";
       userNameEl.style.visibility = "visible";
 
-      startDashboard(); // mulai chart
+      startDashboard(); // Mulai logika dasbor
+      initAiAssistant(initial); // Mulai logika AI Assistant
     } else {
       window.location.href = "./login/login.html";
     }
@@ -183,104 +172,52 @@ document.addEventListener("DOMContentLoaded", () => {
     setChartData(realtimeData);
   }
 
-  // === FUNGSI AI ASSISTANT ===
-  openAiBtn.addEventListener("click", () => aiOverlay.style.display = "flex");
-  closeAiBtn.addEventListener("click", () => aiOverlay.style.display = "none");
-  aiBackdrop.addEventListener("click", () => aiOverlay.style.display = "none");
+  // === DROPDOWN PROFILE ===
+  const userInfoButton = document.getElementById("userInfoButton");
+  const profileDropdown = document.getElementById("profileDropdown");
+  const dropdownIcon = document.getElementById("dropdownIcon");
 
-  chatInput.addEventListener("input", () => sendBtn.disabled = !chatInput.value.trim());
-
-  sendBtn.addEventListener("click", async () => {
-    const msg = chatInput.value.trim();
-    if (!msg) return;
-    appendMessage("user", msg, miniAvatar.textContent);
-    chatInput.value = "";
-    sendBtn.disabled = true;
-    const response = await generateAIResponse(msg);
-    appendMessage("ai", response, "🤖");
+  userInfoButton.addEventListener("click", () => {
+    profileDropdown.classList.toggle("show");
+    dropdownIcon.classList.toggle("rotate");
   });
 
-  function appendMessage(sender, text, avatar) {
-    const msgRow = document.createElement("div");
-    msgRow.className = `message-row ${sender}`;
-    msgRow.innerHTML = `
-      <div class="message-avatar">${avatar}</div>
-      <div class="message-bubble">${text}</div>`;
-    chatMessages.appendChild(msgRow);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-  }
-
-  async function generateAIResponse(message) {
-    const systemContext = `
-Anda adalah asisten AI untuk sistem monitoring PLTMH bernama Agnivolt.
-Tugas: bantu user memahami data monitoring, menjelaskan performa sistem,
-dan memberi insight atau saran maintenance jika perlu.
-Gunakan Bahasa Indonesia yang jelas dan profesional.`;
-
-    const body = {
-      contents: [{ parts: [{ text: systemContext + "\n\nPertanyaan user: " + message }] }],
-      generationConfig: { temperature: 0.7, maxOutputTokens: 300 },
-    };
-
-    try {
-      const res = await fetch(GEMINI_API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-      const data = await res.json();
-      return data.candidates?.[0]?.content?.parts?.[0]?.text || "Tidak ada respons dari AI.";
-    } catch {
-      return "Terjadi kesalahan saat menghubungi AI.";
+  document.addEventListener("click", (e) => {
+    if (!userInfoButton.contains(e.target) && !profileDropdown.contains(e.target)) {
+      profileDropdown.classList.remove("show");
+      dropdownIcon.classList.remove("rotate");
     }
-  }
-});
+  });
 
-// === DROPDOWN PROFILE ===
-const userInfoButton = document.getElementById("userInfoButton");
-const profileDropdown = document.getElementById("profileDropdown");
-const dropdownIcon = document.getElementById("dropdownIcon");
+  // === AKSI TOMBOL DROPDOWN ===
+  const profileItem = profileDropdown.querySelector(".dropdown-item:nth-child(1)");
+  const settingsItem = profileDropdown.querySelector(".dropdown-item:nth-child(2)");
+  const logoutItem = profileDropdown.querySelector(".dropdown-item.logout");
 
-userInfoButton.addEventListener("click", () => {
-  profileDropdown.classList.toggle("show");
-  dropdownIcon.classList.toggle("rotate");
-});
+  profileItem.addEventListener("click", () => window.location.href = "/profile/profile.html");
 
-document.addEventListener("click", (e) => {
-  if (!userInfoButton.contains(e.target) && !profileDropdown.contains(e.target)) {
-    profileDropdown.classList.remove("show");
-    dropdownIcon.classList.remove("rotate");
-  }
-});
+  settingsItem.addEventListener("click", () => {
+    const toast = document.createElement("div");
+    toast.className = "toast-message";
+    toast.textContent = "Pengaturan belum tersedia";
+    document.body.appendChild(toast);
 
-// === AKSI TOMBOL DROPDOWN ===
-const profileItem = profileDropdown.querySelector(".dropdown-item:nth-child(1)");
-const settingsItem = profileDropdown.querySelector(".dropdown-item:nth-child(2)");
-const logoutItem = profileDropdown.querySelector(".dropdown-item.logout");
+    setTimeout(() => toast.classList.add("show"), 100);
+    setTimeout(() => {
+      toast.classList.remove("show");
+      setTimeout(() => toast.remove(), 300);
+    }, 2000);
+  });
 
-profileItem.addEventListener("click", () => window.location.href = "/profile/profile.html");
-
-settingsItem.addEventListener("click", () => {
-  const toast = document.createElement("div");
-  toast.className = "toast-message";
-  toast.textContent = "Pengaturan belum tersedia";
-  document.body.appendChild(toast);
-
-  setTimeout(() => toast.classList.add("show"), 100);
-  setTimeout(() => {
-    toast.classList.remove("show");
-    setTimeout(() => toast.remove(), 300);
-  }, 2000);
-});
-
-logoutItem.addEventListener("click", () => {
-  signOut(auth) 
-    .then(() => {
-      toast.textContent = "Logout berhasil!";
-      window.location.href = "/login/login.html";
-    })
-    .catch((error) => {
-      console.log("Gagal logout:", error);
-      toast.textContent = "Terjadi kesalahan saat logout. Silahkan coba lagi.";
-    });
+  logoutItem.addEventListener("click", () => {
+    signOut(auth) 
+      .then(() => {
+        toast.textContent = "Logout berhasil!";
+        window.location.href = "/login/login.html";
+      })
+      .catch((error) => {
+        console.log("Gagal logout:", error);
+        toast.textContent = "Terjadi kesalahan saat logout. Silahkan coba lagi.";
+      });
+  });
 });
