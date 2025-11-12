@@ -133,6 +133,11 @@ loginBtn.addEventListener('click', async () => {
     
     hideLoading(loading);
     showToast('Login berhasil! Mengalihkan...', 'success');
+
+    // Simpan status login dan info user
+    localStorage.setItem("registered", "true");
+    localStorage.setItem("loggedIn", "true");
+    localStorage.setItem("userEmail", userCredential.user.email);
     
     setTimeout(() => {
       window.location.href = '/agnivolt.html';
@@ -184,6 +189,11 @@ googleLoginBtn.addEventListener('click', async () => {
     
     hideLoading(loading);
     showToast('Login dengan Google berhasil!', 'success');
+
+    // Simpan status login dan info user
+    localStorage.setItem("registered", "true");
+    localStorage.setItem("loggedIn", "true");
+    localStorage.setItem("userEmail", userCredential.user.email);
     
     setTimeout(() => {
       window.location.href = '/agnivolt.html';
@@ -239,7 +249,9 @@ passwordField.addEventListener('keypress', (e) => {
 auth.onAuthStateChanged((user) => {
   if (user) {
     console.log('User already logged in:', user.email);
-    // Uncomment the line below if you want auto-redirect for logged-in users
-    // window.location.href = '/dashboard/dashboard.html';
+    localStorage.setItem("loggedIn", "true");
+    localStorage.setItem("userEmail", user.email);
+    // Auto redirect kalau udah login
+    window.location.href = '/agnivolt.html';
   }
 });
