@@ -60,6 +60,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // === LOGIKA DASHBOARD ===
   function startDashboard() {
     let realtimeData = { labels: [], voltage: [], current: [], power: [], rpm: [] };
+    let turbineStartTime = null;
 
     const dailyData = {
       labels: ["00:00", "04:00", "08:00", "12:00", "16:00", "20:00"],
@@ -122,7 +123,22 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("power").textContent = power.toFixed(2);
       document.getElementById("rpm").textContent = rpm.toFixed(2);
       document.getElementById("totalPower").textContent = totalEnergy.toFixed(4);
-      document.getElementById("duration").textContent = new Date().toLocaleTimeString();
+      
+      let durationText = "00:00:00";
+      if (rpm > 0) {
+        if (turbineStartTime === null) {
+          turbineStartTime = new Date();
+        }
+        const durationMs = new Date() - turbineStartTime;
+        const hours = Math.floor(durationMs / 3600000);
+        const minutes = Math.floor((durationMs % 3600000) / 60000);
+        const seconds = Math.floor((durationMs % 60000) / 1000);
+        durationText = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      } else {
+        turbineStartTime = null; 
+      }
+      document.getElementById("duration").textContent = durationText;
+      
       document.getElementById("efficiency").textContent = (85 + Math.random() * 10).toFixed(0);
 
       // Tambah ke chart data
